@@ -6,27 +6,36 @@ import { Label } from "@radix-ui/react-label"
 import {signIn}  from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { toast, Toaster } from "sonner"
 
 const Page = () => {
     const [email,setEmail] = useState<string>("");
     const [password,setPassword] = useState<string>("");
     const router = useRouter()
     const handleSubmit = async () =>{
+        try{
          const response:any  = await signIn("credentials",{
              email,
              password,
              redirect:false
          });
-         console.log(response)
-         if(response.ok){
-             router.push("/dashboard");
-         }else{
-            console.log("Some error occurred");
-         }
+
+            if(response?.error){
+               throw new Error(response.error);
+            }
+            if(response?.ok){
+                router.push("/dashboard");
+            }
+            
+        }catch(err){
+
+            toast.error(err instanceof Error ? err.message : "An error occurred while logging in")
+        }
          
     }
     return (
         <div className="w-full  min-h-screen flex justify-center items-center ">
+            <Toaster position="top-center" closeButton/>
             <Card className="w-full max-w-md">
                 <CardHeader>
                     <CardTitle>Login to your account</CardTitle>
